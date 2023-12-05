@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "NeonLFCharacter.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
+
 UCLASS()
 class NEONLFSAM_API ANeonLFCharacter : public ACharacter
 {
@@ -16,6 +19,11 @@ public:
 	ANeonLFCharacter();
 
 protected:
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* CameraComponent;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
