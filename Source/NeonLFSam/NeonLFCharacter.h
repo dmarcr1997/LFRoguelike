@@ -19,6 +19,9 @@ public:
 	ANeonLFCharacter();
 
 protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ProjectileClass;
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
 
@@ -29,6 +32,8 @@ protected:
 
 	void MoveForward(float value);
 	void MoveRight(float value);
+
+	void PrimaryAttack();
 
 
 public:	
