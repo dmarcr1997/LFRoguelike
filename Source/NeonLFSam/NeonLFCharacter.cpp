@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "DrawDebugHelpers.h"
+#include "NeonLFInteractionComponent.h"
+
 // Sets default values
 ANeonLFCharacter::ANeonLFCharacter()
 {
@@ -18,6 +20,8 @@ ANeonLFCharacter::ANeonLFCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	InteractionComponent = CreateDefaultSubobject<UNeonLFInteractionComponent>("InteractionComp");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -90,6 +94,8 @@ void ANeonLFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ANeonLFCharacter::PrimaryAttack);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ANeonLFCharacter::PrimaryInteract);
 }
 
 void ANeonLFCharacter::PrimaryAttack()
@@ -101,5 +107,12 @@ void ANeonLFCharacter::PrimaryAttack()
 
 
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+}
+
+void ANeonLFCharacter::PrimaryInteract()
+{
+	if (InteractionComponent) {
+		InteractionComponent->PrimaryInteract();
+	}
 }
 

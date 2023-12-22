@@ -8,7 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
-
+class UNeonLFInteractionComponent; 
 UCLASS()
 class NEONLFSAM_API ANeonLFCharacter : public ACharacter
 {
@@ -27,6 +27,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UNeonLFInteractionComponent* InteractionComponent; 
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -34,6 +38,8 @@ protected:
 	void MoveRight(float value);
 
 	void PrimaryAttack();
+
+	void PrimaryInteract();
 
 
 
