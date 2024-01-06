@@ -9,6 +9,8 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UNeonLFInteractionComponent; 
+class UAnimMontage;
+
 UCLASS()
 class NEONLFSAM_API ANeonLFCharacter : public ACharacter
 {
@@ -19,8 +21,13 @@ public:
 	ANeonLFCharacter();
 
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackAnim;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
@@ -29,7 +36,7 @@ protected:
 	UCameraComponent* CameraComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UNeonLFInteractionComponent* InteractionComponent; 
+	UNeonLFInteractionComponent* InteractionComponent;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,7 +47,8 @@ protected:
 	void PrimaryAttack();
 
 	void PrimaryInteract();
-
+	
+	void PrimaryAttack_TimeElapsed();
 
 
 public:	

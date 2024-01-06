@@ -32,6 +32,7 @@ void UNeonLFInteractionComponent::PrimaryInteract()
 			if (HitActor->Implements<UNeonLFGameplayInterface>()) {
 				APawn* MyPawn = Cast<APawn>(MyOwner);
 				INeonLFGameplayInterface::Execute_Interact(HitActor, MyPawn);
+				break;
 			}
 		}
 		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
