@@ -3,6 +3,7 @@
 
 #include "NeonLFExplosiveBarrel.h"
 #include "PhysicsEngine/RadialForceComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 ANeonLFExplosiveBarrel::ANeonLFExplosiveBarrel()
@@ -20,11 +21,18 @@ ANeonLFExplosiveBarrel::ANeonLFExplosiveBarrel()
 
 }
 
+void ANeonLFExplosiveBarrel::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Barrel hit by %s"), *OtherActor->GetName());
+
+	RadialForceComponent->FireImpulse();
+}
+
 // Called when the game starts or when spawned
 void ANeonLFExplosiveBarrel::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	MeshComponent->OnComponentHit.AddDynamic(this, &ANeonLFExplosiveBarrel::OnHit);
 }
 
 // Called every frame
