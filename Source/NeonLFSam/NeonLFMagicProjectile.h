@@ -20,13 +20,13 @@ public:
 	ANeonLFMagicProjectile();
 
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
 	USphereComponent* SphereComp;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
 	UProjectileMovementComponent* MovementComp;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
 	UParticleSystemComponent* EffectComp;
 
 	// Called when the game starts or when spawned
