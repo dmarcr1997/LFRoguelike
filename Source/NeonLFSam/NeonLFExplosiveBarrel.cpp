@@ -4,6 +4,7 @@
 #include "NeonLFExplosiveBarrel.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ANeonLFExplosiveBarrel::ANeonLFExplosiveBarrel()
@@ -17,28 +18,29 @@ ANeonLFExplosiveBarrel::ANeonLFExplosiveBarrel()
 
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("RadialForce");
 	RadialForceComponent->SetupAttachment(MeshComponent);
+	RadialForceComponent->SetAutoActivate(false);
+	RadialForceComponent->Radius = 750.0f;
+	RadialForceComponent->ImpulseStrength = 2500.0f;
+	RadialForceComponent->bImpulseVelChange = true;
 
+	RadialForceComponent->AddCollisionChannelToAffect(ECC_WorldDynamic);
 
 }
 
 void ANeonLFExplosiveBarrel::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Barrel hit by %s"), *OtherActor->GetName());
-
 	RadialForceComponent->FireImpulse();
+
+	UE_LOG(LogTemp, Log, TEXT("Blow up barrel"));
+	UE_LOG(LogTemp, Warning, TEXT("Other Actor: %s, at game time: %f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds);
+
+	FString CominedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
+	DrawDebugString(GetWorld(), Hit.ImpactPoint, CominedString, nullptr, FColor::Green, 2.0f, true);
 }
 
-// Called when the game starts or when spawned
-void ANeonLFExplosiveBarrel::BeginPlay()
+void ANeonLFExplosiveBarrel::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 	MeshComponent->OnComponentHit.AddDynamic(this, &ANeonLFExplosiveBarrel::OnHit);
-}
-
-// Called every frame
-void ANeonLFExplosiveBarrel::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 

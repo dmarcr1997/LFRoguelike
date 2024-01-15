@@ -63,7 +63,7 @@ void ANeonLFCharacter::MoveRight(float value)
 void ANeonLFCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	/*
 	// -- Rotation Visualization -- //
 	const float DrawScale = 100.0f;
 	const float Thickness = 5.0f;
@@ -79,7 +79,7 @@ void ANeonLFCharacter::Tick(float DeltaTime)
 	FVector ControllerDirection_LineEnd = LineStart + (GetControlRotation().Vector() * 100.0f);
 	// Draw 'Controller' Rotation ('PlayerController' that 'possessed' this character)
 	DrawDebugDirectionalArrow(GetWorld(), LineStart, ControllerDirection_LineEnd, DrawScale, FColor::Green, false, 0.0f, 0, Thickness);
-
+	*/
 }
 
 // Called to bind functionality to input
@@ -115,6 +115,7 @@ void ANeonLFCharacter::PrimaryAttack_TimeElapsed()
 {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+	
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
@@ -122,3 +123,20 @@ void ANeonLFCharacter::PrimaryAttack_TimeElapsed()
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
+
+/*
+TODO: 
+Problem: Projectiles don’t hit where the player expects. (under ‘crosshair’)
+
+Projectile is spawned in player hand which can be left / right based on orientation.
+Camera Perspective. Aiming at something really close will miss target due to camera alignment with character.
+Solution: Line-trace from Camera to World and find desired ‘impact’ location.
+
+Re-calculate new projectile spawn Rotation by using:
+
+Spawn Location (Hand position)
+Impact Location (Line Trace result) // Reference ‘Find Look At Rotation’ function for help.
+(If nothing was hit, use ‘trace end’ vector as desired target)
+(Line trace against multiple object types: WorldDynamic, WorldStatic)
+
+*/
