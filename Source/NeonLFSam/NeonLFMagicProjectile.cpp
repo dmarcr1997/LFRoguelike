@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "NeonLFAttributeComponent.h"
 
 
 // Sets default values
@@ -16,6 +17,7 @@ ANeonLFMagicProjectile::ANeonLFMagicProjectile()
 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
 	SphereComp->SetCollisionObjectType(ECC_WorldDynamic);
 	SphereComp->SetCollisionProfileName("Projectile");
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ANeonLFMagicProjectile::OnActorOverlap);
 	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
@@ -26,6 +28,17 @@ ANeonLFMagicProjectile::ANeonLFMagicProjectile()
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bInitialVelocityInLocalSpace = true;
 
+}
+
+void ANeonLFMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor) {
+		UNeonLFAttributeComponent* AttributeComp = Cast<UNeonLFAttributeComponent>(OtherActor->GetComponentByClass(UNeonLFAttributeComponent::StaticClass()));
+		if (AttributeComp) {
+			AttributeComp->ApplyHealthChange(-20.0f);
+			Destroy();
+		}
+	}
 }
 
 // Called when the game starts or when spawned

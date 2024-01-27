@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UNeonLFInteractionComponent; 
+class UNeonLFAttributeComponent;
 class UAnimMontage;
 
 UCLASS()
@@ -37,6 +38,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UNeonLFInteractionComponent* InteractionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UNeonLFAttributeComponent* AttributeComponent;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

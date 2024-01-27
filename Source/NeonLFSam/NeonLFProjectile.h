@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "NeonLFProjectile.generated.h"
 
+class USphereComponent;
+class UProjectileMovementComponent;
+class UParticleSystemComponent;
+
 UCLASS()
 class NEONLFSAM_API ANeonLFProjectile : public AActor
 {
@@ -16,6 +20,19 @@ public:
 	ANeonLFProjectile();
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	USphereComponent* SphereComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	UProjectileMovementComponent* MovementComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	UParticleSystemComponent* EffectComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	float ProjectileSpeed = 1000.0f;
+
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

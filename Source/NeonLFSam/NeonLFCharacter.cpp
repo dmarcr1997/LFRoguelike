@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "DrawDebugHelpers.h"
 #include "NeonLFInteractionComponent.h"
+#include "NeonLFAttributeComponent.h"
 
 // Sets default values
 ANeonLFCharacter::ANeonLFCharacter()
@@ -23,6 +24,7 @@ ANeonLFCharacter::ANeonLFCharacter()
 
 	InteractionComponent = CreateDefaultSubobject<UNeonLFInteractionComponent>("InteractionComp");
 
+	AttributeComponent = CreateDefaultSubobject<UNeonLFAttributeComponent>("AttributesComp");
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
@@ -113,34 +115,36 @@ void ANeonLFCharacter::PrimaryInteract()
 
 void ANeonLFCharacter::PrimaryAttack_TimeElapsed()
 {
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	FVector CameraLocation = CameraComponent->GetComponentLocation();
-	FRotator CameraRotation = CameraComponent->GetComponentRotation();
-	FVector End = CameraLocation + (CameraRotation.Vector() * 1000);
-	FHitResult Hit;
-	FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	if(ensure(ProjectileClass)){
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FVector CameraLocation = CameraComponent->GetComponentLocation();
+		FRotator CameraRotation = CameraComponent->GetComponentRotation();
+		FVector End = CameraLocation + (CameraRotation.Vector() * 1000);
+		FHitResult Hit;
+		FCollisionObjectQueryParams ObjectQueryParams;
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
-	bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, HandLocation, End, ObjectQueryParams);
-	
-	FVector ImpactLocation;
+		bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, HandLocation, End, ObjectQueryParams);
 
-	if (bBlockingHit) {
+		FVector ImpactLocation;
 
-		ImpactLocation = Hit.ImpactPoint;
+		if (bBlockingHit) {
+
+			ImpactLocation = Hit.ImpactPoint;
+		}
+		else {
+			ImpactLocation = End;
+		}
+
+		FRotator ProjectileRotation = FRotationMatrix::MakeFromX(ImpactLocation - HandLocation).Rotator();
+
+		FTransform SpawnTM = FTransform(ProjectileRotation, HandLocation);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+
+		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 	}
-	else {
-		ImpactLocation = End;
-	}
-
-	FRotator ProjectileRotation = FRotationMatrix::MakeFromX(ImpactLocation - HandLocation).Rotator();
-
-	FTransform SpawnTM = FTransform(ProjectileRotation, HandLocation);
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
 
