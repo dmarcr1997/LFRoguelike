@@ -114,8 +114,28 @@ void ANeonLFCharacter::PrimaryInteract()
 void ANeonLFCharacter::PrimaryAttack_TimeElapsed()
 {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+	FVector CameraLocation = CameraComponent->GetComponentLocation();
+	FRotator CameraRotation = CameraComponent->GetComponentRotation();
+	FVector End = CameraLocation + (CameraRotation.Vector() * 1000);
+	FHitResult Hit;
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+
+	bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, HandLocation, End, ObjectQueryParams);
 	
+	FVector ImpactLocation;
+
+	if (bBlockingHit) {
+
+		ImpactLocation = Hit.ImpactPoint;
+	}
+	else {
+		ImpactLocation = End;
+	}
+
+	FRotator ProjectileRotation = FRotationMatrix::MakeFromX(ImpactLocation - HandLocation).Rotator();
+
+	FTransform SpawnTM = FTransform(ProjectileRotation, HandLocation);
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
