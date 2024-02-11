@@ -14,6 +14,8 @@ UNeonLFAttributeComponent::UNeonLFAttributeComponent()
 bool UNeonLFAttributeComponent::ApplyHealthChange(float delta)
 {
 	Health += delta;
+
+	OnHealthChanged.Broadcast(nullptr, this, Health, delta);
 	return true;
 }
 
