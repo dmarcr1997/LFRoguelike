@@ -2,14 +2,24 @@
 
 
 #include "MyNeonLFBlackholeProjectile.h"
+#include "Components/SphereComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 AMyNeonLFBlackholeProjectile::AMyNeonLFBlackholeProjectile() : ANeonLFProjectile()
 {
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AMyNeonLFBlackholeProjectile::OnActorOverlap);
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("RadialForce");
 	RadialForceComponent->SetupAttachment(RootComponent);
 	RadialForceComponent->SetAutoActivate(true);
-	RadialForceComponent->Radius = 750.0f;
-	RadialForceComponent->ImpulseStrength = 2500.0f;
+	RadialForceComponent->Radius = 7500.0f;
+	RadialForceComponent->ImpulseStrength = -2500.0f;
 	RadialForceComponent->bImpulseVelChange = true;
+	RadialForceComponent->AddCollisionChannelToAffect(ECC_WorldDynamic);
+}
+
+void AMyNeonLFBlackholeProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != GetInstigator()) {
+		OtherActor->Destroy();
+	}
 }

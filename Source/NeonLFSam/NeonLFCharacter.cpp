@@ -146,21 +146,3 @@ void ANeonLFCharacter::PrimaryAttack_TimeElapsed()
 		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 	}
 }
-
-
-/*
-TODO: 
-Problem: Projectiles don’t hit where the player expects. (under ‘crosshair’)
-
-Projectile is spawned in player hand which can be left / right based on orientation.
-Camera Perspective. Aiming at something really close will miss target due to camera alignment with character.
-Solution: Line-trace from Camera to World and find desired ‘impact’ location.
-
-Re-calculate new projectile spawn Rotation by using:
-
-Spawn Location (Hand position)
-Impact Location (Line Trace result) // Reference ‘Find Look At Rotation’ function for help.
-(If nothing was hit, use ‘trace end’ vector as desired target)
-(Line trace against multiple object types: WorldDynamic, WorldStatic)
-
-*/
