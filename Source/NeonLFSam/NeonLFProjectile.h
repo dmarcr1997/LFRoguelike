@@ -10,7 +10,7 @@ class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
 
-UCLASS()
+UCLASS(ABSTRACT)
 class NEONLFSAM_API ANeonLFProjectile : public AActor
 {
 	GENERATED_BODY()
@@ -20,24 +20,26 @@ public:
 	ANeonLFProjectile();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* ImpactVFX;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Components")
 	USphereComponent* SphereComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Components")
 	UProjectileMovementComponent* MovementComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Components")
 	UParticleSystemComponent* EffectComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
-	float ProjectileSpeed = 1000.0f;
+	float ProjectileSpeed = 8000.0f;
+	
+	UFUNCTION()
+	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Explode();
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	virtual void PostInitializeComponents() override;
 };

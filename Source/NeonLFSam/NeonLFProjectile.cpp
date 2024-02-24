@@ -5,16 +5,14 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ANeonLFProjectile::ANeonLFProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
-	SphereComp->SetCollisionObjectType(ECC_WorldDynamic);
 	SphereComp->SetCollisionProfileName("Projectile");
+	SphereComp->OnComponentHit.AddDynamic(this, &ANeonLFProjectile::OnActorHit);
 	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
@@ -22,24 +20,31 @@ ANeonLFProjectile::ANeonLFProjectile()
 
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");
 	MovementComp->InitialSpeed = ProjectileSpeed;
+	MovementComp->ProjectileGravityScale = 0.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bInitialVelocityInLocalSpace = true;
 
 }
 
-// Called when the game starts or when spawned
-void ANeonLFProjectile::BeginPlay()
+void ANeonLFProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Super::BeginPlay();
-	
+	Explode();
 }
 
-// Called every frame
-void ANeonLFProjectile::Tick(float DeltaTime)
+void ANeonLFProjectile::Explode_Implementation()
 {
-	Super::Tick(DeltaTime);
-
+	if (ensure(!IsPendingKill()))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+		Destroy();
+	}
 }
+
+void ANeonLFProjectile::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+}
+
 /*
 	Take shared functionality from projectiles
 1) Magic Projectile(Exists)

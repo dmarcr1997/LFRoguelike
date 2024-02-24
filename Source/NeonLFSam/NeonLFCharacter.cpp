@@ -18,7 +18,6 @@ ANeonLFCharacter::ANeonLFCharacter()
 	SpringArmComponent->bUsePawnControlRotation = true;
 	SpringArmComponent->SetupAttachment(RootComponent);
 	
-
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
@@ -28,14 +27,9 @@ ANeonLFCharacter::ANeonLFCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
+	AttackAnimDelay = 0.2f;
 }
 
-// Called when the game starts or when spawned
-void ANeonLFCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
 void ANeonLFCharacter::MoveForward(float value)
 {
@@ -60,28 +54,41 @@ void ANeonLFCharacter::MoveRight(float value)
 	AddMovementInput(RightVector, value);
 }
 
-
-// Called every frame
-void ANeonLFCharacter::Tick(float DeltaTime)
+void ANeonLFCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 {
-	Super::Tick(DeltaTime);
-	/*
-	// -- Rotation Visualization -- //
-	const float DrawScale = 100.0f;
-	const float Thickness = 5.0f;
+	if (ensure(ClassToSpawn)) {
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 
-	FVector LineStart = GetActorLocation();
-	// Offset to the right of pawn
-	LineStart += GetActorRightVector() * 100.0f;
-	// Set line end in direction of the actor's forward
-	FVector ActorDirection_LineEnd = LineStart + (GetActorForwardVector() * 100.0f);
-	// Draw Actor's Direction
-	DrawDebugDirectionalArrow(GetWorld(), LineStart, ActorDirection_LineEnd, DrawScale, FColor::Yellow, false, 0.0f, 0, Thickness);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
 
-	FVector ControllerDirection_LineEnd = LineStart + (GetControlRotation().Vector() * 100.0f);
-	// Draw 'Controller' Rotation ('PlayerController' that 'possessed' this character)
-	DrawDebugDirectionalArrow(GetWorld(), LineStart, ControllerDirection_LineEnd, DrawScale, FColor::Green, false, 0.0f, 0, Thickness);
-	*/
+		FHitResult Hit;
+		FVector TraceStart = CameraComponent->GetComponentLocation();
+		FVector TraceEnd = CameraComponent->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
+
+
+		FCollisionShape Shape;
+		Shape.SetSphere(20.0f);
+
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		FCollisionObjectQueryParams ObjParams;
+		ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+		ObjParams.AddObjectTypesToQuery(ECC_Pawn);
+
+		
+
+		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
+		{
+			TraceEnd = Hit.ImpactPoint;
+		}
+		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
+		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
+		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
+	}
 }
 
 // Called to bind functionality to input
@@ -95,6 +102,8 @@ void ANeonLFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ANeonLFCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("SecondaryAttack", IE_Pressed, this, &ANeonLFCharacter::BlackHoleAttack);
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ANeonLFCharacter::Dash);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ANeonLFCharacter::PrimaryInteract);
@@ -103,7 +112,7 @@ void ANeonLFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void ANeonLFCharacter::PrimaryAttack()
 {
 	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ANeonLFCharacter::PrimaryAttack_TimeElapsed, 0.2);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ANeonLFCharacter::PrimaryAttack_TimeElapsed, AttackAnimDelay);
 }
 
 void ANeonLFCharacter::PrimaryInteract()
@@ -115,34 +124,27 @@ void ANeonLFCharacter::PrimaryInteract()
 
 void ANeonLFCharacter::PrimaryAttack_TimeElapsed()
 {
-	if(ensure(ProjectileClass)){
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-		FVector CameraLocation = CameraComponent->GetComponentLocation();
-		FRotator CameraRotation = CameraComponent->GetComponentRotation();
-		FVector End = CameraLocation + (CameraRotation.Vector() * 1000);
-		FHitResult Hit;
-		FCollisionObjectQueryParams ObjectQueryParams;
-		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	SpawnProjectile(ProjectileClass);
+}
 
-		bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, HandLocation, End, ObjectQueryParams);
+void ANeonLFCharacter::BlackHoleAttack()
+{
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_BlackholeAttack, this, &ANeonLFCharacter::BlackholeAttack_TimeElapsed, AttackAnimDelay);
+}
 
-		FVector ImpactLocation;
+void ANeonLFCharacter::BlackholeAttack_TimeElapsed()
+{
+	SpawnProjectile(BlackHoleProjectileClass);
+}
 
-		if (bBlockingHit) {
+void ANeonLFCharacter::Dash()
+{
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ANeonLFCharacter::Dash_TimeElapsed, AttackAnimDelay);
+}
 
-			ImpactLocation = Hit.ImpactPoint;
-		}
-		else {
-			ImpactLocation = End;
-		}
-
-		FRotator ProjectileRotation = FRotationMatrix::MakeFromX(ImpactLocation - HandLocation).Rotator();
-
-		FTransform SpawnTM = FTransform(ProjectileRotation, HandLocation);
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Instigator = this;
-
-		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
-	}
+void ANeonLFCharacter::Dash_TimeElapsed()
+{
+	SpawnProjectile(DashProjectileClass);
 }
