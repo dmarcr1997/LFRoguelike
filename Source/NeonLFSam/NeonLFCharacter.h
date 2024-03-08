@@ -74,7 +74,10 @@ protected:
 	// Re-use spawn logic between attacks
 	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
 
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, UNeonLFAttributeComponent* OwningComp, float NewHealth, float Delta);
 
+	virtual void PostInitializeComponents() override;
 public:	
 
 	// Called to bind functionality to input

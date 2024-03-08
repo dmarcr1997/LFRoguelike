@@ -30,6 +30,12 @@ ANeonLFCharacter::ANeonLFCharacter()
 	AttackAnimDelay = 0.2f;
 }
 
+void ANeonLFCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	AttributeComponent->OnHealthChanged.AddDynamic(this, &ANeonLFCharacter::OnHealthChanged);
+}
+
 
 void ANeonLFCharacter::MoveForward(float value)
 {
@@ -88,6 +94,15 @@ void ANeonLFCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
 		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
 		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
+	}
+}
+
+void ANeonLFCharacter::OnHealthChanged(AActor* InstigatorActor, UNeonLFAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
 	}
 }
 

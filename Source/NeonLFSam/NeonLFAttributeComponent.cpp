@@ -11,6 +11,11 @@ UNeonLFAttributeComponent::UNeonLFAttributeComponent()
 
 
 
+bool UNeonLFAttributeComponent::IsAlive() const
+{
+	return Health > 0.0f;
+}
+
 bool UNeonLFAttributeComponent::ApplyHealthChange(float delta)
 {
 	Health += delta;
