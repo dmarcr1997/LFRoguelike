@@ -99,6 +99,14 @@ void ANeonLFCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 
 void ANeonLFCharacter::OnHealthChanged(AActor* InstigatorActor, UNeonLFAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (MeshComponent)
+	{
+		MeshComponent->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
+		
+		FVector ColorVector(HitFlashColor.R, HitFlashColor.G, HitFlashColor.B);
+		MeshComponent->SetVectorParameterValueOnMaterials("FlashColor", ColorVector);
+	}
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());

@@ -9,6 +9,7 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
+class UAudioComponent;
 
 UCLASS(ABSTRACT)
 class NEONLFSAM_API ANeonLFProjectile : public AActor
@@ -34,6 +35,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
 	float ProjectileSpeed = 8000.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "FX")
+	UAudioComponent* FlightSoundComp;
+
+	UPROPERTY(EditAnywhere, Category = "FX")
+	USoundBase* ImpactSound;
+
+
+
 	
 	UFUNCTION()
 	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

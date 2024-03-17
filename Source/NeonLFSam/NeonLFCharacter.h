@@ -53,6 +53,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UNeonLFAttributeComponent* AttributeComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	FLinearColor HitFlashColor;
+
+
 
 	void MoveForward(float value);
 	void MoveRight(float value);

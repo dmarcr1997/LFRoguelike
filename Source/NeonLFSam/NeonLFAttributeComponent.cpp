@@ -6,7 +6,7 @@
 // Sets default values for this component's properties
 UNeonLFAttributeComponent::UNeonLFAttributeComponent()
 {
-	Health = 100.0f;
+	Health = HealthMax;
 }
 
 
@@ -18,7 +18,7 @@ bool UNeonLFAttributeComponent::IsAlive() const
 
 bool UNeonLFAttributeComponent::ApplyHealthChange(float delta)
 {
-	Health += delta;
+	Health = FMath::Clamp(Health + delta, 0, HealthMax);
 
 	OnHealthChanged.Broadcast(nullptr, this, Health, delta);
 	return true;
