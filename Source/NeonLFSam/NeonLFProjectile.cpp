@@ -40,7 +40,7 @@ void ANeonLFProjectile::Explode_Implementation()
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
 		//ImpactSound->PlaySoundAtLocation(GetActorLocation());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 		Destroy();
 	}
 }
